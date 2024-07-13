@@ -1,0 +1,91 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <title>YouTube 2 Mp3</title>
+  <style>
+    .loading {
+      animation: rotating 2s infinite;
+    }
+
+    @keyframes rotating {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2 class="my-5 text-center">Youtube to Mp3</h2>
+    <form action="/download" onsubmit="sendFile(event)">
+      <div class="form-group my-4">
+        <input type="text" name="url" class="form-control" id="item" placeholder="Youtube Video Link">
+      </div>
+      <button class="btn btn-outline-info submitBtn" type="submit"> Download MP3</button>
+      <p class="text-center">
+        <a href="" id="target" target="_blank" style="display: none;" onclick="dissmiss(event)" download="">Click here
+          to
+          download</a>
+      </p>
+    </form>
+  </div>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    function sendFile(event) {
+      event.preventDefault();
+      const item = document.querySelector('#item').value;
+      const submitBtn = document.querySelector('.submitBtn');
+
+
+      if (item.length > 10) {
+        submitBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="loading"
+            viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
+            <path
+              d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
+          </svg> Processing...`;
+        axios.get(`/convert?url=${item}`)
+          .then(res => {
+            document.querySelector('a#target').setAttribute('href', res.data.link);
+            document.querySelector('a#target').setAttribute('download', res.data.title);
+            document.querySelector('a#target').setAttribute('style', "display:block");
+
+          }).catch(err => {
+            submitBtn.innerHTML = "Error! ";
+
+            setTimeout(() => {
+              submitBtn.innerHTML = "Download MP3";
+              document.querySelector('#item').value = "";
+              document.querySelector('a#target').setAttribute('href', "");
+              document.querySelector('a#target').setAttribute('download', "");
+              document.querySelector('a#target').setAttribute('style', "display:none");
+            }, 2500);
+
+          });
+      }
+
+      function dissmiss(event) {
+        if (event.target.value == "") {
+          event.preventDefault();
+        }
+        document.querySelector('a#target').setAttribute('href', "");
+        document.querySelector('a#target').setAttribute('download', "");
+        document.querySelector('a#target').setAttribute('style', "display:none");
+      }
+    }
+  </script>
+</body>
+
+</html>
